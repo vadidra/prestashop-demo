@@ -1,0 +1,56 @@
+https://www.emmanuelgautier.com/blog/snippets/prestashop-docker-compose
+
+
+version: "3"
+services:
+
+  prestashop-db:
+    container_name: prestashop-db
+    image: mysql:5.7
+#    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 'admin'
+    ports:
+      # <Port exposed> : <MySQL Port running inside container>
+      - '3307:3306'
+#    expose:
+#      # Opens port 3306 on the container
+#      - '3306'
+      # Where our data will be persisted
+#    volumes:
+#      - prestashop-db:/var/lib/mysql
+
+
+  
+  prestashop:
+    container_name: prestashop
+    image: prestashop/prestashop:latest
+    environment:
+      PS_INSTALL_AUTO: 1
+      DB_SERVER: 'prestashop-db'
+      DB_USER: root
+      DB_PASSWORD: admin
+      DB_NAME: prestashop
+      PS_INSTALL_DB: 1
+      PS_FOLDER_INSTALL: install_renamed
+      PS_FOLDER_ADMIN: admin_ps
+    ports:
+      - '8080:80'  
+
+# Names our volume
+#volumes:
+#  prestashop-db:      
+
+#  networks:
+#    prestashopnetwork:
+#      name: prestashopnetwork  
+
+
+
+
+ # create a network for containers to communicate
+#$ docker network create prestashop-net
+# launch mysql 5.7 container
+#$ docker run -ti --name some-mysql --network prestashop-net -e MYSQL_ROOT_PASSWORD=admin -p 3307:3306 -d mysql:5.7
+# launch prestashop container
+#$ docker run -ti --name some-prestashop --network prestashop-net -e DB_SERVER=some-mysql -p 8080:80 -d prestashop/prestashop:latest   
