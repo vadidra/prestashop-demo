@@ -13,6 +13,9 @@ Run the following command:
 
 ` docker compose up -d`
 
+When installing PrestaShop with Docker for the first time, 
+you need to access https://localhost:8080/install4577
+
 ## Ref
 
 https://devdocs.prestashop-project.org/8/basics/installation/environments/docker/
