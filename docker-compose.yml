@@ -1,46 +1,43 @@
-version: "3"
-
+version: '3'
 services:
-  prestashop:
-    image: prestashop/prestashop:8-apache
+  mysql:
+    container_name: some-mysql
+    image: mysql:5.7
+    restart: unless-stopped
     environment:
-      - DB_SERVER=db
-      - DB_NAME=prestashop
-      - DB_USER=prestashop
-      - DB_PASSWD=prestashop
-      - PS_DEV_MODE=1
-      - PS_DEMO_MODE=1
-      - PS_INSTALL_AUTO=1
-      - PS_DOMAIN=localhost:8080
-      - PS_FOLDER_ADMIN=admin_ps
-      - ADMIN_MAIL=demo@prestashop.com
-      - ADMIN_PASSWD=prestashop_demo
-    links:
-      - db
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: prestashop
+    networks:
+      - prestashop_network
+    volumes:
+      - dbdata:/var/lib/mysql
+  prestashop:
+    container_name: prestashop
+    image: prestashop/prestashop:latest
+    restart: unless-stopped
     depends_on:
-      - db
+      - mysql
     ports:
       - 8080:80
-    networks:
-      - prestashop-net
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080" ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-
-  db:
-    image: mysql:5.7
-    command: --default-authentication-plugin=mysql_native_password
-    #image: mysql:8
-    #command: --default-authentication-plugin=caching_sha2_password
     environment:
-      - MYSQL_ROOT_PASSWORD=admin
-      - MYSQL_DATABASE=prestashop
-      - MYSQL_USER=prestashop
-      - MYSQL_PASSWORD=prestashop
+      DB_SERVER: some-mysql
+      DB_NAME: prestashop
+      DB_USER: root
+      DB_PASSWD: admin
+      PS_FOLDER_ADMIN: admin4577
+      PS_FOLDER_INSTALL: install4577
     networks:
-      - prestashop-net
-
+      - prestashop_network
+    volumes:
+      - type: bind
+        source: ./modules/testModule # local path to the module
+        target: /var/www/html/modules/testModule # path to be mounted in the container
+      - type: bind
+        source: ./themes/myTheme # local path to the theme
+        target:  /var/www/html/themes/myTheme # path to be mounted in the container
+      - psdata:/var/www/html
 networks:
-  prestashop-net:
+  prestashop_network:
+volumes:
+  psdata:
+  dbdata:
